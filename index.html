@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlipCount</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⏱</text></svg>">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-color: #0d0d0d;
+      --card-bg: #1a1a1a;
+      --text-muted: #888888;
+      --text-light: #ffffff;
+      --accent: #ff6b35;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-light);
+      font-family: 'Roboto Mono', monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      overflow-x: hidden;
+    }
+
+    /* Top: Page Title */
+    .app-header {
+      width: 100%;
+      padding: 2rem 3rem;
+      text-align: left;
+    }
+
+    .app-header h1 {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      letter-spacing: 2px;
+    }
+
+    /* Main Content Area */
+    .app-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 1280px;
+      padding: 0 1rem;
+      gap: 4rem;
+    }
+
+    /* Setup Panel */
+    .setup-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .input-group label {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .input-group input[type=number] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .timer-input-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .input-group input {
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid var(--text-muted);
+      color: var(--text-light);
+      font-size: 3rem;
+      font-family: inherit;
+      text-align: center;
+      width: 100px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .input-separator {
+      font-size: 2.5rem;
+      color: var(--text-muted);
+      font-family: 'Oswald', sans-serif;
+      line-height: 1;
+      padding-top: 1rem;
+    }
+
+    .motivational-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+      letter-spacing: 0.5px;
+      font-style: italic;
+      min-height: 1.2rem;
+      text-align: center;
+    }
+
+    .quick-select {
+      display: flex;
+      gap: 0.75rem;
+      overflow-x: auto;
+      max-width: 100%;
+      padding: 0.5rem;
+    }
+
+    .preset-chip {
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      color: var(--text-muted);
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+    }
+
+    .preset-chip:hover {
+      border-color: var(--text-light);
+      color: var(--text-light);
+    }
+
+    .preset-chip.active {
+      background: var(--text-light);
+      color: var(--bg-color);
+      border-color: var(--text-light);
+    }
+
+    /* Flip Clock Container */
+    .flip-clock-container {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .time-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .flip-cards {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .flip-card {
+      width: 120px;
+      height: 160px;
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      position: relative;
+      perspective: 1000px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .flip-card:hover {
+      box-shadow: 0 4px 15px rgba(255,107,53, 0.2);
+    }
+
+    .card-top, .card-bottom, .flap-top, .flap-bottom {
+      position: absolute;
+      left: 0; right: 0;
+      height: 50%;
+      overflow: hidden;
+      background-color: var(--card-bg);
+      background-image: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.1) 50%
+      );
+      background-size: 100% 4px;
+      display: flex;
+      justify-content: center;
+      backface-visibility: hidden;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+    }
+
+    .card-top, .flap-top {
+      top: 0;
+      align-items: flex-end;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      transform-origin: bottom;
+      border-bottom: 1px solid #000;
+    }
+
+    .card-bottom, .flap-bottom {
+      bottom: 0;
+      align-items: flex-start;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+      transform-origin: top;
+      border-top: 1px solid #000;
+    }
+
+    .digit {
+      font-family: 'Oswald', sans-serif;
+      font-size: 90px;
+      font-weight: 700;
+      color: var(--text-light);
+      line-height: 0; /* Perfectly aligns text baseline to the cut */
+    }
+
+    @keyframes flipTop {
+      0%   { transform: rotateX(0deg); }
+      100% { transform: rotateX(-90deg); }
+    }
+
+    @keyframes flipBottom {
+      0%   { transform: rotateX(90deg); }
+      100% { transform: rotateX(0deg); }
+    }
+
+    .flap-top.flip {
+      animation: flipTop 150ms ease-in forwards;
+      z-index: 10;
+    }
+
+    .flap-bottom {
+      transform: rotateX(90deg);
+      z-index: 10;
+    }
+
+    .flap-bottom.flip {
+      animation: flipBottom 150ms ease-out 150ms forwards;
+    }
+
+    /* Colon Separator */
+    .separator-dots {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transform: translateY(-15px);
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      background-color: var(--accent);
+      border-radius: 50%;
+    }
+
+    .label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Bottom Area */
+    .app-footer {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background-color: #222;
+    }
+
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background-color: var(--accent);
+      transition: width 1s linear, background-color 0.3s ease;
+    }
+
+    .control-area {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2.5rem 1rem;
+    }
+
+    .btn {
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      padding: 0.75rem 2rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      border-color: var(--text-muted) !important;
+      color: var(--text-muted) !important;
+      background: transparent !important;
+    }
+
+    .btn:hover:not(:disabled) {
+      color: var(--text-light);
+      border-color: var(--text-light);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .flip-card {
+        width: 90px;
+        height: 120px;
+      }
+      .digit {
+        font-size: 65px;
+      }
+      .flip-clock-container {
+        gap: 1.5rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .app-main {
+        gap: 2.5rem;
+      }
+      .flip-clock-container {
+        gap: 0.75rem;
+      }
+      .control-area {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .control-area .btn {
+        width: 100%;
+      }
+      .flip-cards {
+        gap: 0.25rem;
+      }
+      .flip-card {
+        width: 60px;
+        height: 80px;
+        border-radius: 4px;
+      }
+      .digit {
+        font-size: 42px;
+      }
+      .separator-dots {
+        gap: 0.5rem;
+        transform: translateY(-10px);
+      }
+      .dot {
+        width: 8px;
+        height: 8px;
+      }
+      .label {
+        font-size: 0.7rem;
+      }
+      .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+      }
+      .input-group input {
+        font-size: 2.2rem;
+        width: 70px;
+      }
+      .input-separator {
+        font-size: 2rem;
+      }
+      .preset-chip {
+        padding: 0.4rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* --- Phase 4: Completion Overlay CSS --- */
+    .completion-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 100;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+    }
+
+    .setup-panel {
+      text-align: center;
+      margin-bottom: 2rem;
+      transition: all 0.4s ease;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .setup-panel.hidden {
+      opacity: 0;
+      transform: translateY(-20px);
+      pointer-events: none;
+      position: absolute;
+    }
+
+    .overlay-content {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .overlay-content h2 {
+      font-size: 3rem;
+      letter-spacing: 2px;
+      margin: 0;
+      color: #fff;
+    }
+
+    .overlay-content p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+    }
+    
+    .btn-primary {
+      background: var(--text-light);
+      color: var(--bg-color);
+      border-color: var(--text-light);
+      font-weight: bold;
+      margin-top: 1rem;
+    }
+    
+    .btn-primary:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Title -->
+  <header class="app-header">
+    <h1>FlipCount</h1>
+  </header>
+
+  <!-- Main Content Centered -->
+  <main class="app-main">
+    
+    <!-- Setup Panel -->
+    <div class="setup-panel" id="setup-panel">
+      <div class="timer-input-row">
+        <div class="input-group">
+          <label for="hours-input">HH</label>
+          <input type="number" id="hours-input" min="0" max="999" value="100">
+        </div>
+        <div class="input-separator">:</div>
+        <div class="input-group">
+          <label for="minutes-input">MM</label>
+          <input type="number" id="minutes-input" min="0" max="59" value="0">
+        </div>
+        <div class="input-separator">:</div>
+        <div class="input-group">
+          <label for="seconds-input">SS</label>
+          <input type="number" id="seconds-input" min="0" max="59" value="0">
+        </div>
+      </div>
+      <p id="motivational-text" class="motivational-text">Legendary. Let's go. 🔥</p>
+      
+      <!-- Quick Selection Chips (Still sync with Hours only) -->
+      <div class="quick-select" id="quick-select">
+        <button type="button" class="preset-chip" data-val="1">1h</button>
+        <button type="button" class="preset-chip" data-val="5">5h</button>
+        <button type="button" class="preset-chip" data-val="10">10h</button>
+        <button type="button" class="preset-chip" data-val="25">25h</button>
+        <button type="button" class="preset-chip" data-val="50">50h</button>
+        <button type="button" class="preset-chip" data-val="75">75h</button>
+        <button type="button" class="preset-chip active" data-val="100">100h</button>
+        <button type="button" class="preset-chip" data-val="200">200h</button>
+      </div>
+    </div>
+
+    <!-- Flip Clock Container -->
+    <div class="flip-clock-container" id="flip-clock">
+      
+      <!-- HOURS -->
+      <div class="time-group">
+        <div class="flip-cards">
+          <div class="flip-card" id="h-hundreds" data-digit="0" style="display: none;">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+          <div class="flip-card" id="h-tens" data-digit="0">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+          <div class="flip-card" id="h-ones" data-digit="0">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+        </div>
+        <span class="label">HOURS</span>
+      </div>
+
+      <!-- Separator -->
+      <div class="separator-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <!-- MINUTES -->
+      <div class="time-group">
+        <div class="flip-cards">
+          <div class="flip-card" id="m-tens" data-digit="0">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+          <div class="flip-card" id="m-ones" data-digit="0">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+        </div>
+        <span class="label">MINUTES</span>
+      </div>
+
+      <!-- Separator -->
+      <div class="separator-dots">
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+      <!-- SECONDS -->
+      <div class="time-group">
+        <div class="flip-cards">
+          <div class="flip-card" id="s-tens" data-digit="0">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+          <div class="flip-card" id="s-ones" data-digit="0">
+            <div class="card-top"><span class="digit">0</span></div>
+            <div class="card-bottom"><span class="digit">0</span></div>
+          </div>
+        </div>
+        <span class="label">SECONDS</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Timer Complete Overlay (Phase 4) -->
+  <div id="completion-overlay" class="completion-overlay">
+    <div class="overlay-content">
+      <h2>🎉 CHALLENGE COMPLETE</h2>
+      <p id="completion-subtext">You did it. 0 hours of focused work.</p>
+      <button class="btn btn-primary" id="btn-start-new">START NEW</button>
+    </div>
+  </div>
+
+  <!-- Bottom Section -->
+  <footer class="app-footer">
+    
+    <!-- Empty Progress Bar -->
+    <div class="progress-bar-container">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <!-- Control Area -->
+    <div class="control-area">
+      <button class="btn" id="btn-start">START</button>
+      <button class="btn" id="btn-pause">PAUSE</button>
+      <button class="btn" id="btn-reset">RESET</button>
+    </div>
+  </footer>
+
+  <script>
+    // JS Logic specifically for keeping the Setup Panel inputs in sync
+    // per the Phase 1 PRD Sub-task 8 & Phase 5/7 additions.
+    
+    const hoursInput = document.getElementById('hours-input');
+    const minutesInput = document.getElementById('minutes-input');
+    const secondsInput = document.getElementById('seconds-input');
+    const presetChips = document.querySelectorAll('.preset-chip');
+    const motivationalText = document.getElementById('motivational-text');
+    const btnStart = document.getElementById('btn-start');
+
+    function updateMotivationalTextAndStartBtn() {
+      const hh = parseInt(hoursInput.value || 0, 10);
+      const mm = parseInt(minutesInput.value || 0, 10);
+      const ss = parseInt(secondsInput.value || 0, 10);
+      
+      const totalSecs = (hh * 3600) + (mm * 60) + ss;
+
+      if (isNaN(totalSecs) || totalSecs <= 0 || hh < 0 || mm < 0 || ss < 0 || mm > 59 || ss > 59) {
+        motivationalText.textContent = "";
+        btnStart.disabled = true;
+      } else {
+        btnStart.disabled = false;
+        if (hh < 10) {
+          motivationalText.textContent = "A solid sprint.";
+        } else if (hh < 50) {
+          motivationalText.textContent = "A serious commitment.";
+        } else if (hh < 100) {
+          motivationalText.textContent = "Elite-level grind.";
+        } else {
+          motivationalText.textContent = "Legendary. Let's go. 🔥";
+        }
+      }
+    }
+
+    // Input listeners for validation
+    [hoursInput, minutesInput, secondsInput].forEach(inp => {
+      inp.addEventListener('input', () => {
+        updateMotivationalTextAndStartBtn();
+        
+        // Sync HH highlighting if Hours input changed
+        if (inp === hoursInput) {
+          const val = parseInt(hoursInput.value, 10);
+          presetChips.forEach(chip => {
+            let chipVal = parseInt(chip.getAttribute('data-val'), 10);
+            if (chipVal === val) {
+              chip.classList.add('active');
+            } else {
+              chip.classList.remove('active');
+            }
+          });
+        }
+      });
+    });
+
+    // 2. Sync from Chip click to Input value
+    presetChips.forEach(chip => {
+      chip.addEventListener('click', (e) => {
+        let val = e.target.getAttribute('data-val');
+        hoursInput.value = val;
+        
+        // Manually dispatch input event to ensure UI updates (chip actively highlighted)
+        const event = new Event('input', { bubbles: true });
+        hoursInput.dispatchEvent(event);
+      });
+    });
+
+    // --- Phase 2: Flip Card Animation ---
+    // Expose flipCard to window for console testing per acceptance criteria
+    window.flipCard = function(cardId, newDigit) {
+      const cardElement = document.getElementById(cardId);
+      if (!cardElement) return;
+      
+      const currentDigit = cardElement.getAttribute('data-digit');
+      if (currentDigit === String(newDigit)) return;
+
+      cardElement.setAttribute('data-digit', newDigit);
+
+      const cardTop = cardElement.querySelector('.card-top .digit');
+      const cardBottom = cardElement.querySelector('.card-bottom .digit');
+      
+      // Update top half immediately so it's ready when flap swings away
+      cardTop.textContent = newDigit;
+
+      const flapTop = document.createElement('div');
+      flapTop.className = 'flap-top';
+      flapTop.innerHTML = `<span class="digit">${currentDigit}</span>`;
+
+      const flapBottom = document.createElement('div');
+      flapBottom.className = 'flap-bottom';
+      flapBottom.innerHTML = `<span class="digit">${newDigit}</span>`;
+
+      cardElement.appendChild(flapTop);
+      cardElement.appendChild(flapBottom);
+
+      // Trigger animation
+      requestAnimationFrame(() => {
+        flapTop.classList.add('flip');
+        flapBottom.classList.add('flip');
+      });
+
+      // Cleanup
+      setTimeout(() => {
+        cardBottom.textContent = newDigit;
+        if (cardElement.contains(flapTop)) flapTop.remove();
+        if (cardElement.contains(flapBottom)) flapBottom.remove();
+      }, 300);
+    };
+
+    let timerState = {
+      totalSeconds: 0,
+      remainingSeconds: 0,
+      isRunning: false,
+      isPaused: false,
+      targetEndTime: null,
+      intervalId: null
+    };
+
+    function saveState() {
+      const stateToSave = {
+        totalSeconds: timerState.totalSeconds,
+        remainingSeconds: timerState.remainingSeconds,
+        isRunning: timerState.isRunning,
+        isPaused: timerState.isPaused,
+        targetEndTime: timerState.targetEndTime
+      };
+      localStorage.setItem('flipCountState', JSON.stringify(stateToSave));
+    }
+
+    function clearState() {
+      localStorage.removeItem('flipCountState');
+    }
+
+    // Anti-sleep Wake Lock API
+    let wakeLock = null;
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {}
+    };
+    const releaseWakeLock = async () => {
+      try {
+        if (wakeLock !== null) {
+          await wakeLock.release();
+          wakeLock = null;
+        }
+      } catch (err) {}
+    };
+
+    const setupPanel = document.getElementById('setup-panel');
+    const btnPause = document.getElementById('btn-pause');
+    const btnReset = document.getElementById('btn-reset');
+    const progressFill = document.getElementById('progress-fill');
+    const hHundredsCard = document.getElementById('h-hundreds');
+
+    function updateCards(hours, minutes, seconds) {
+      const mStr = String(minutes).padStart(2, '0');
+      const sStr = String(seconds).padStart(2, '0');
+      let hStr = '';
+
+      if (hours > 99) {
+        hHundredsCard.style.display = 'flex';
+        hStr = String(hours).padStart(3, '0');
+        window.flipCard('h-hundreds', hStr[0]);
+        window.flipCard('h-tens', hStr[1]);
+        window.flipCard('h-ones', hStr[2]);
+      } else {
+        hHundredsCard.style.display = 'none';
+        hStr = String(hours).padStart(2, '0');
+        // Reset hidden hundreds card silently
+        hHundredsCard.setAttribute('data-digit', '0');
+        hHundredsCard.querySelector('.card-top .digit').textContent = '0';
+        hHundredsCard.querySelector('.card-bottom .digit').textContent = '0';
+        window.flipCard('h-tens', hStr[0]);
+        window.flipCard('h-ones', hStr[1]);
+      }
+
+      window.flipCard('m-tens', mStr[0]);
+      window.flipCard('m-ones', mStr[1]);
+      window.flipCard('s-tens', sStr[0]);
+      window.flipCard('s-ones', sStr[1]);
+      
+      const timeDisplay = hours > 0 ? `${hStr}:${mStr}:${sStr}` : `${mStr}:${sStr}`;
+      document.title = `[${timeDisplay}] FlipCount`;
+    }
+
+    function calculateTimeComponents(totalSecs) {
+      const hours = Math.floor(totalSecs / 3600);
+      const minutes = Math.floor((totalSecs % 3600) / 60);
+      const seconds = totalSecs % 60;
+      return { hours, minutes, seconds };
+    }
+
+    function tick() {
+      if (!timerState.isPaused) {
+        const now = Date.now();
+        timerState.remainingSeconds = Math.max(0, Math.ceil((timerState.targetEndTime - now) / 1000));
+      }
+
+      const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+      updateCards(hours, minutes, seconds);
+      updateProgress();
+      
+      saveState();
+
+      if (timerState.remainingSeconds <= 0) {
+        clearInterval(timerState.intervalId);
+        timerState.isRunning = false;
+        timerState.isPaused = false;
+        triggerTimeUp();
+        clearState();
+        return;
+      }
+    }
+
+    function updateProgress() {
+      if (timerState.totalSeconds === 0) return;
+      
+      const elapsed = timerState.totalSeconds - timerState.remainingSeconds;
+      const pct = (elapsed / timerState.totalSeconds) * 100;
+      progressFill.style.width = Math.min(pct, 100) + '%';
+
+      if ((timerState.remainingSeconds / timerState.totalSeconds) <= 0.1) {
+        progressFill.style.backgroundColor = '#ff3535'; 
+      } else {
+        progressFill.style.backgroundColor = 'var(--accent)'; 
+      }
+    }
+
+    // --- Phase 4: Custom Audio Alarm ---
+    const alarmAudio = new Audio('mixkit-digital-clock-digital-alarm-buzzer-992.wav');
+    alarmAudio.loop = true;
+
+    function playAlarm() {
+      alarmAudio.currentTime = 0;
+      alarmAudio.play().catch(e => console.error("Audio playback failed:", e));
+    }
+
+    function stopAlarm() {
+      alarmAudio.pause();
+      alarmAudio.currentTime = 0;
+    }
+
+    const completionOverlay = document.getElementById('completion-overlay');
+    const completionSubtext = document.getElementById('completion-subtext');
+    const btnStartNew = document.getElementById('btn-start-new');
+
+    function triggerTimeUp() {
+      progressFill.style.width = '100%';
+      progressFill.style.backgroundColor = '#4caf50'; 
+      updateCards(0, 0, 0);
+
+      // Trigger Phase 4 overlay and alarm
+      const totalHrs = parseInt(hoursInput.value, 10);
+      completionSubtext.textContent = `You did it. ${totalHrs} hours of focused work.`;
+      completionOverlay.style.display = 'flex';
+      playAlarm();
+      releaseWakeLock();
+      document.title = "FlipCount";
+    }
+
+    btnStart.addEventListener('click', () => {
+      if (timerState.isRunning && !timerState.isPaused) return;
+
+      const hh = parseInt(hoursInput.value || 0, 10);
+      const mm = parseInt(minutesInput.value || 0, 10);
+      const ss = parseInt(secondsInput.value || 0, 10);
+      
+      const totalSecs = (hh * 3600) + (mm * 60) + ss;
+      if (isNaN(totalSecs) || totalSecs <= 0) return;
+
+      timerState.totalSeconds = totalSecs;
+      timerState.remainingSeconds = timerState.totalSeconds;
+      timerState.isRunning = true;
+      timerState.isPaused = false;
+      timerState.targetEndTime = Date.now() + (timerState.totalSeconds * 1000);
+      saveState();
+      
+      setupPanel.classList.add('hidden');
+      btnPause.textContent = 'PAUSE';
+      progressFill.style.width = '0%';
+      progressFill.style.backgroundColor = 'var(--accent)';
+
+      const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+      updateCards(hours, minutes, seconds);
+
+      timerState.intervalId = setInterval(tick, 1000);
+      requestWakeLock();
+    });
+
+    btnPause.addEventListener('click', () => {
+      if (!timerState.isRunning) return;
+
+      if (timerState.isPaused) {
+        timerState.isPaused = false;
+        btnPause.textContent = 'PAUSE';
+        timerState.targetEndTime = Date.now() + (timerState.remainingSeconds * 1000);
+        saveState();
+        timerState.intervalId = setInterval(tick, 1000);
+        requestWakeLock();
+        // Update title to restore countdown instantly if it was "PAUSED"
+        const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+        updateCards(hours, minutes, seconds);
+      } else {
+        timerState.isPaused = true;
+        clearInterval(timerState.intervalId);
+        saveState();
+        btnPause.textContent = 'RESUME';
+        releaseWakeLock();
+        document.title = "[PAUSED] FlipCount";
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      stopAlarm();
+      clearState();
+      clearInterval(timerState.intervalId);
+      timerState.isRunning = false;
+      timerState.isPaused = false;
+      
+      setupPanel.classList.remove('hidden');
+      btnPause.textContent = 'PAUSE';
+      progressFill.style.width = '0%';
+      progressFill.style.backgroundColor = 'var(--accent)';
+      
+      // Reset inputs to default
+      hoursInput.value = '100';
+      minutesInput.value = '0';
+      secondsInput.value = '0';
+      updateMotivationalTextAndStartBtn();
+
+      updateCards(0, 0, 0);
+      releaseWakeLock();
+      document.title = "FlipCount";
+    });
+
+    btnStartNew.addEventListener('click', () => {
+      completionOverlay.style.display = 'none';
+      btnReset.click();
+    });
+
+    function loadState() {
+      const saved = localStorage.getItem('flipCountState');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (parsed.isRunning) {
+            timerState.totalSeconds = parsed.totalSeconds;
+            timerState.isRunning = parsed.isRunning;
+            timerState.isPaused = parsed.isPaused;
+            timerState.targetEndTime = parsed.targetEndTime;
+            
+            if (parsed.isPaused) {
+              timerState.remainingSeconds = parsed.remainingSeconds;
+            } else {
+              const now = Date.now();
+              const remainingMs = parsed.targetEndTime - now;
+              timerState.remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+            }
+            
+            // Restore UI
+            setupPanel.classList.add('hidden');
+            const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+            updateCards(hours, minutes, seconds);
+            updateProgress();
+
+            if (timerState.remainingSeconds <= 0 && !timerState.isPaused) {
+               triggerTimeUp();
+               clearState();
+            } else if (!timerState.isPaused) {
+               btnPause.textContent = 'PAUSE';
+               timerState.intervalId = setInterval(tick, 1000);
+               requestWakeLock();
+            } else {
+               btnPause.textContent = 'RESUME';
+               document.title = "[PAUSED] FlipCount";
+            }
+          }
+        } catch (e) {
+          console.error('Error loading state', e);
+        }
+      }
+    }
+
+    loadState();
+
+    // Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+      if (document.activeElement === hoursInput) return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        if (timerState.isRunning) {
+          btnPause.click();
+        } else {
+          btnStart.click();
+        }
+      } else if (e.code === 'KeyR') {
+        if (!timerState.isRunning || timerState.isPaused) {
+          btnReset.click();
+        }
+      }
+    });
+  </script>
+</body>
+</html>
