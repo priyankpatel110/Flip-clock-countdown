@@ -42,6 +42,13 @@
       width: 100%;
       padding: 2rem 3rem;
       text-align: left;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    body.idle .app-header {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-20px);
     }
 
     .app-header h1 {
@@ -189,13 +196,13 @@
     }
 
     .flip-card {
-      width: 120px;
-      height: 160px;
+      width: 240px;
+      height: 320px;
       background-color: var(--card-bg);
-      border-radius: 8px;
+      border-radius: 16px;
       position: relative;
-      perspective: 1000px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      perspective: 2000px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.5);
       transition: box-shadow 0.2s ease;
     }
 
@@ -214,34 +221,34 @@
         rgba(255, 255, 255, 0) 50%,
         rgba(0, 0, 0, 0.1) 50%
       );
-      background-size: 100% 4px;
+      background-size: 100% 8px;
       display: flex;
       justify-content: center;
       backface-visibility: hidden;
-      box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+      box-shadow: inset 0 0 16px rgba(0,0,0,0.8);
     }
 
     .card-top, .flap-top {
       top: 0;
       align-items: flex-end;
-      border-top-left-radius: 8px;
-      border-top-right-radius: 8px;
+      border-top-left-radius: 16px;
+      border-top-right-radius: 16px;
       transform-origin: bottom;
-      border-bottom: 1px solid #000;
+      border-bottom: 2px solid #000;
     }
 
     .card-bottom, .flap-bottom {
       bottom: 0;
       align-items: flex-start;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
+      border-bottom-left-radius: 16px;
+      border-bottom-right-radius: 16px;
       transform-origin: top;
-      border-top: 1px solid #000;
+      border-top: 2px solid #000;
     }
 
     .digit {
       font-family: 'Oswald', sans-serif;
-      font-size: 90px;
+      font-size: 180px;
       font-weight: 700;
       color: var(--text-light);
       line-height: 0; /* Perfectly aligns text baseline to the cut */
@@ -275,13 +282,13 @@
     .separator-dots {
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      transform: translateY(-15px);
+      gap: 2rem;
+      transform: translateY(-30px);
     }
 
     .dot {
-      width: 12px;
-      height: 12px;
+      width: 24px;
+      height: 24px;
       background-color: var(--accent);
       border-radius: 50%;
     }
@@ -318,6 +325,13 @@
       justify-content: center;
       gap: 1.5rem;
       padding: 2.5rem 1rem;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    body.idle .control-area {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(20px);
     }
 
     .btn {
@@ -427,6 +441,30 @@
       backdrop-filter: blur(4px);
     }
 
+    .mode-selector {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .mode-btn {
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      color: var(--text-muted);
+      padding: 0.5rem 1.5rem;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     .setup-panel {
       text-align: center;
       margin-bottom: 2rem;
@@ -439,6 +477,29 @@
       transform: translateY(-20px);
       pointer-events: none;
       position: absolute;
+    }
+
+    .start-from-container {
+      margin-top: 1.5rem;
+      animation: fadeIn 0.3s ease;
+      display: none;
+    }
+    .start-from-container .label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      letter-spacing: 1px;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .start-from-row .input-group input {
+      font-size: 1.5rem;
+      width: 50px;
+      border-bottom-width: 1px;
+      color: var(--text-muted);
+    }
+    .start-from-row .input-separator {
+      font-size: 1.5rem;
+      padding-top: 0.2rem;
     }
 
     .overlay-content {
@@ -494,6 +555,12 @@
     
     <!-- Setup Panel -->
     <div class="setup-panel" id="setup-panel">
+      <!-- Mode Selector -->
+      <div class="mode-selector">
+        <button class="mode-btn active" id="btn-mode-down">COUNTDOWN</button>
+        <button class="mode-btn" id="btn-mode-up">COUNT UP</button>
+      </div>
+
       <div class="timer-input-row">
         <div class="input-group">
           <label for="hours-input">HH</label>
@@ -511,6 +578,24 @@
         </div>
       </div>
       <p id="motivational-text" class="motivational-text">Legendary. Let's go. 🔥</p>
+      
+      <!-- Start From (Count Up Only) -->
+      <div class="start-from-container" id="start-from-container">
+        <span class="label">START FROM (OPTIONAL)</span>
+        <div class="timer-input-row start-from-row">
+          <div class="input-group">
+            <input type="number" id="start-hours-input" min="0" max="999" value="0">
+          </div>
+          <div class="input-separator">:</div>
+          <div class="input-group">
+            <input type="number" id="start-minutes-input" min="0" max="59" value="0">
+          </div>
+          <div class="input-separator">:</div>
+          <div class="input-group">
+            <input type="number" id="start-seconds-input" min="0" max="59" value="0">
+          </div>
+        </div>
+      </div>
       
       <!-- Quick Selection Chips (Still sync with Hours only) -->
       <div class="quick-select" id="quick-select">
@@ -627,6 +712,32 @@
     const presetChips = document.querySelectorAll('.preset-chip');
     const motivationalText = document.getElementById('motivational-text');
     const btnStart = document.getElementById('btn-start');
+    
+    const btnModeDown = document.getElementById('btn-mode-down');
+    const btnModeUp = document.getElementById('btn-mode-up');
+    
+    const startFromContainer = document.getElementById('start-from-container');
+    const startHoursInput = document.getElementById('start-hours-input');
+    const startMinutesInput = document.getElementById('start-minutes-input');
+    const startSecondsInput = document.getElementById('start-seconds-input');
+
+    let currentMode = 'countdown';
+
+    btnModeDown.addEventListener('click', () => {
+      currentMode = 'countdown';
+      btnModeDown.classList.add('active');
+      btnModeUp.classList.remove('active');
+      startFromContainer.style.display = 'none';
+      updateMotivationalTextAndStartBtn();
+    });
+
+    btnModeUp.addEventListener('click', () => {
+      currentMode = 'countup';
+      btnModeUp.classList.add('active');
+      btnModeDown.classList.remove('active');
+      startFromContainer.style.display = 'block';
+      updateMotivationalTextAndStartBtn();
+    });
 
     function updateMotivationalTextAndStartBtn() {
       const hh = parseInt(hoursInput.value || 0, 10);
@@ -635,25 +746,52 @@
       
       const totalSecs = (hh * 3600) + (mm * 60) + ss;
 
-      if (isNaN(totalSecs) || totalSecs <= 0 || hh < 0 || mm < 0 || ss < 0 || mm > 59 || ss > 59) {
+      if (isNaN(totalSecs) || hh < 0 || mm < 0 || ss < 0 || mm > 59 || ss > 59) {
         motivationalText.textContent = "";
         btnStart.disabled = true;
-      } else {
-        btnStart.disabled = false;
-        if (hh < 10) {
-          motivationalText.textContent = "A solid sprint.";
-        } else if (hh < 50) {
-          motivationalText.textContent = "A serious commitment.";
-        } else if (hh < 100) {
-          motivationalText.textContent = "Elite-level grind.";
+        return;
+      }
+
+      if (currentMode === 'countdown') {
+        if (totalSecs <= 0) {
+          motivationalText.textContent = "";
+          btnStart.disabled = true;
         } else {
-          motivationalText.textContent = "Legendary. Let's go. 🔥";
+          btnStart.disabled = false;
+          if (hh < 10) motivationalText.textContent = "A solid sprint.";
+          else if (hh < 50) motivationalText.textContent = "A serious commitment.";
+          else if (hh < 100) motivationalText.textContent = "Elite-level grind.";
+          else motivationalText.textContent = "Legendary. Let's go. 🔥";
+        }
+      } else {
+        // Count Up Mode
+        const sh = parseInt(startHoursInput.value || 0, 10);
+        const sm = parseInt(startMinutesInput.value || 0, 10);
+        const ss = parseInt(startSecondsInput.value || 0, 10);
+        const startSecs = (sh * 3600) + (sm * 60) + ss;
+
+        if (isNaN(startSecs) || sh < 0 || sm < 0 || ss < 0 || sm > 59 || ss > 59) {
+          motivationalText.textContent = "";
+          btnStart.disabled = true;
+          return;
+        }
+
+        if (totalSecs > 0 && startSecs >= totalSecs) {
+           motivationalText.textContent = "Start time must be less than target.";
+           btnStart.disabled = true;
+        } else {
+           btnStart.disabled = false;
+           if (totalSecs > 0) {
+             motivationalText.textContent = "Counts up until target time.";
+           } else {
+             motivationalText.textContent = "Stopwatch mode (infinite).";
+           }
         }
       }
     }
 
     // Input listeners for validation
-    [hoursInput, minutesInput, secondsInput].forEach(inp => {
+    [hoursInput, minutesInput, secondsInput, startHoursInput, startMinutesInput, startSecondsInput].forEach(inp => {
       inp.addEventListener('input', () => {
         updateMotivationalTextAndStartBtn();
         
@@ -727,21 +865,27 @@
     };
 
     let timerState = {
+      mode: 'countdown',
       totalSeconds: 0,
       remainingSeconds: 0,
+      elapsedSeconds: 0,
       isRunning: false,
       isPaused: false,
       targetEndTime: null,
+      startTime: null,
       intervalId: null
     };
 
     function saveState() {
       const stateToSave = {
+        mode: timerState.mode,
         totalSeconds: timerState.totalSeconds,
         remainingSeconds: timerState.remainingSeconds,
+        elapsedSeconds: timerState.elapsedSeconds,
         isRunning: timerState.isRunning,
         isPaused: timerState.isPaused,
-        targetEndTime: timerState.targetEndTime
+        targetEndTime: timerState.targetEndTime,
+        startTime: timerState.startTime
       };
       localStorage.setItem('flipCountState', JSON.stringify(stateToSave));
     }
@@ -749,6 +893,22 @@
     function clearState() {
       localStorage.removeItem('flipCountState');
     }
+
+    let idleTimeout = null;
+    function resetIdleTimeout() {
+      clearTimeout(idleTimeout);
+      document.body.classList.remove('idle');
+      
+      if (timerState.isRunning && !timerState.isPaused) {
+        idleTimeout = setTimeout(() => {
+          document.body.classList.add('idle');
+        }, 4000);
+      }
+    }
+
+    ['mousemove', 'touchstart', 'click', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, resetIdleTimeout);
+    });
 
     // Anti-sleep Wake Lock API
     let wakeLock = null;
@@ -813,35 +973,71 @@
     }
 
     function tick() {
-      if (!timerState.isPaused) {
-        const now = Date.now();
-        timerState.remainingSeconds = Math.max(0, Math.ceil((timerState.targetEndTime - now) / 1000));
-      }
+      const now = Date.now();
 
-      const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
-      updateCards(hours, minutes, seconds);
-      updateProgress();
-      
-      saveState();
+      if (timerState.mode === 'countdown') {
+        if (!timerState.isPaused) {
+          timerState.remainingSeconds = Math.max(0, Math.ceil((timerState.targetEndTime - now) / 1000));
+        }
 
-      if (timerState.remainingSeconds <= 0) {
-        clearInterval(timerState.intervalId);
-        timerState.isRunning = false;
-        timerState.isPaused = false;
-        triggerTimeUp();
-        clearState();
-        return;
+        const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+        updateCards(hours, minutes, seconds);
+        updateProgress();
+        saveState();
+
+        if (timerState.remainingSeconds <= 0) {
+          clearInterval(timerState.intervalId);
+          timerState.isRunning = false;
+          timerState.isPaused = false;
+          triggerTimeUp();
+          clearState();
+          return;
+        }
+      } else {
+        // Count Up
+        if (!timerState.isPaused) {
+          timerState.elapsedSeconds = Math.max(0, Math.floor((now - timerState.startTime) / 1000));
+        }
+
+        const { hours, minutes, seconds } = calculateTimeComponents(timerState.elapsedSeconds);
+        updateCards(hours, minutes, seconds);
+        updateProgress();
+        saveState();
+
+        if (timerState.totalSeconds > 0 && timerState.elapsedSeconds >= timerState.totalSeconds) {
+          clearInterval(timerState.intervalId);
+          timerState.isRunning = false;
+          timerState.isPaused = false;
+          triggerTimeUp();
+          clearState();
+          return;
+        }
       }
     }
 
     function updateProgress() {
-      if (timerState.totalSeconds === 0) return;
+      if (timerState.totalSeconds === 0) {
+        // Infinite stopwatch
+        progressFill.style.width = '100%';
+        progressFill.style.backgroundColor = 'var(--accent)';
+        return;
+      }
       
-      const elapsed = timerState.totalSeconds - timerState.remainingSeconds;
-      const pct = (elapsed / timerState.totalSeconds) * 100;
+      let pct = 0;
+      let ratioRemaining = 0;
+
+      if (timerState.mode === 'countdown') {
+        const elapsed = timerState.totalSeconds - timerState.remainingSeconds;
+        pct = (elapsed / timerState.totalSeconds) * 100;
+        ratioRemaining = timerState.remainingSeconds / timerState.totalSeconds;
+      } else {
+        pct = (timerState.elapsedSeconds / timerState.totalSeconds) * 100;
+        ratioRemaining = (timerState.totalSeconds - timerState.elapsedSeconds) / timerState.totalSeconds;
+      }
+
       progressFill.style.width = Math.min(pct, 100) + '%';
 
-      if ((timerState.remainingSeconds / timerState.totalSeconds) <= 0.1) {
+      if (ratioRemaining <= 0.1) {
         progressFill.style.backgroundColor = '#ff3535'; 
       } else {
         progressFill.style.backgroundColor = 'var(--accent)'; 
@@ -869,7 +1065,13 @@
     function triggerTimeUp() {
       progressFill.style.width = '100%';
       progressFill.style.backgroundColor = '#4caf50'; 
-      updateCards(0, 0, 0);
+
+      if (timerState.mode === 'countup' && timerState.totalSeconds > 0) {
+        const { hours, minutes, seconds } = calculateTimeComponents(timerState.totalSeconds);
+        updateCards(hours, minutes, seconds);
+      } else {
+        updateCards(0, 0, 0);
+      }
 
       // Trigger Phase 4 overlay and alarm
       const totalHrs = parseInt(hoursInput.value, 10);
@@ -877,6 +1079,8 @@
       completionOverlay.style.display = 'flex';
       playAlarm();
       releaseWakeLock();
+      resetIdleTimeout();
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
       document.title = "FlipCount";
     }
 
@@ -888,13 +1092,25 @@
       const ss = parseInt(secondsInput.value || 0, 10);
       
       const totalSecs = (hh * 3600) + (mm * 60) + ss;
-      if (isNaN(totalSecs) || totalSecs <= 0) return;
+      if (currentMode === 'countdown' && (isNaN(totalSecs) || totalSecs <= 0)) return;
 
+      timerState.mode = currentMode;
       timerState.totalSeconds = totalSecs;
-      timerState.remainingSeconds = timerState.totalSeconds;
       timerState.isRunning = true;
       timerState.isPaused = false;
-      timerState.targetEndTime = Date.now() + (timerState.totalSeconds * 1000);
+
+      if (currentMode === 'countdown') {
+        timerState.remainingSeconds = timerState.totalSeconds;
+        timerState.targetEndTime = Date.now() + (timerState.totalSeconds * 1000);
+      } else {
+        const sh = parseInt(startHoursInput.value || 0, 10);
+        const sm = parseInt(startMinutesInput.value || 0, 10);
+        const ss = parseInt(startSecondsInput.value || 0, 10);
+        const startSecs = (sh * 3600) + (sm * 60) + ss;
+
+        timerState.elapsedSeconds = startSecs;
+        timerState.startTime = Date.now() - (startSecs * 1000);
+      }
       saveState();
       
       setupPanel.classList.add('hidden');
@@ -902,7 +1118,14 @@
       progressFill.style.width = '0%';
       progressFill.style.backgroundColor = 'var(--accent)';
 
-      const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+      // Fullscreen request for mobile and clean presentation
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+      resetIdleTimeout();
+
+      const timeVal = currentMode === 'countdown' ? timerState.remainingSeconds : timerState.elapsedSeconds;
+      const { hours, minutes, seconds } = calculateTimeComponents(timeVal);
       updateCards(hours, minutes, seconds);
 
       timerState.intervalId = setInterval(tick, 1000);
@@ -915,12 +1138,20 @@
       if (timerState.isPaused) {
         timerState.isPaused = false;
         btnPause.textContent = 'PAUSE';
-        timerState.targetEndTime = Date.now() + (timerState.remainingSeconds * 1000);
+        
+        if (timerState.mode === 'countdown') {
+          timerState.targetEndTime = Date.now() + (timerState.remainingSeconds * 1000);
+        } else {
+          timerState.startTime = Date.now() - (timerState.elapsedSeconds * 1000);
+        }
+        
         saveState();
         timerState.intervalId = setInterval(tick, 1000);
         requestWakeLock();
-        // Update title to restore countdown instantly if it was "PAUSED"
-        const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+        resetIdleTimeout();
+        
+        const timeVal = timerState.mode === 'countdown' ? timerState.remainingSeconds : timerState.elapsedSeconds;
+        const { hours, minutes, seconds } = calculateTimeComponents(timeVal);
         updateCards(hours, minutes, seconds);
       } else {
         timerState.isPaused = true;
@@ -928,6 +1159,7 @@
         saveState();
         btnPause.textContent = 'RESUME';
         releaseWakeLock();
+        resetIdleTimeout();
         document.title = "[PAUSED] FlipCount";
       }
     });
@@ -938,6 +1170,8 @@
       clearInterval(timerState.intervalId);
       timerState.isRunning = false;
       timerState.isPaused = false;
+      resetIdleTimeout();
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
       
       setupPanel.classList.remove('hidden');
       btnPause.textContent = 'PAUSE';
@@ -948,6 +1182,9 @@
       hoursInput.value = '100';
       minutesInput.value = '0';
       secondsInput.value = '0';
+      startHoursInput.value = '0';
+      startMinutesInput.value = '0';
+      startSecondsInput.value = '0';
       updateMotivationalTextAndStartBtn();
 
       updateCards(0, 0, 0);
@@ -966,26 +1203,43 @@
         try {
           const parsed = JSON.parse(saved);
           if (parsed.isRunning) {
+            timerState.mode = parsed.mode || 'countdown';
             timerState.totalSeconds = parsed.totalSeconds;
             timerState.isRunning = parsed.isRunning;
             timerState.isPaused = parsed.isPaused;
-            timerState.targetEndTime = parsed.targetEndTime;
             
-            if (parsed.isPaused) {
-              timerState.remainingSeconds = parsed.remainingSeconds;
+            if (timerState.mode === 'countdown') {
+              timerState.targetEndTime = parsed.targetEndTime;
+              if (parsed.isPaused) {
+                timerState.remainingSeconds = parsed.remainingSeconds;
+              } else {
+                const now = Date.now();
+                const remainingMs = parsed.targetEndTime - now;
+                timerState.remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+              }
             } else {
-              const now = Date.now();
-              const remainingMs = parsed.targetEndTime - now;
-              timerState.remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+              timerState.startTime = parsed.startTime;
+              if (parsed.isPaused) {
+                timerState.elapsedSeconds = parsed.elapsedSeconds;
+              } else {
+                const now = Date.now();
+                const elapsedMs = now - parsed.startTime;
+                timerState.elapsedSeconds = Math.max(0, Math.floor(elapsedMs / 1000));
+              }
             }
             
             // Restore UI
             setupPanel.classList.add('hidden');
-            const { hours, minutes, seconds } = calculateTimeComponents(timerState.remainingSeconds);
+            const timeVal = timerState.mode === 'countdown' ? timerState.remainingSeconds : timerState.elapsedSeconds;
+            const { hours, minutes, seconds } = calculateTimeComponents(timeVal);
             updateCards(hours, minutes, seconds);
             updateProgress();
 
-            if (timerState.remainingSeconds <= 0 && !timerState.isPaused) {
+            const isFinished = timerState.mode === 'countdown' 
+                  ? timerState.remainingSeconds <= 0 
+                  : (timerState.totalSeconds > 0 && timerState.elapsedSeconds >= timerState.totalSeconds);
+
+            if (isFinished && !timerState.isPaused) {
                triggerTimeUp();
                clearState();
             } else if (!timerState.isPaused) {
