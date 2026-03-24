@@ -1172,6 +1172,10 @@
       }
 
       if (isSynced) {
+         requestWakeLock();
+         if (document.documentElement.requestFullscreen) {
+           document.documentElement.requestFullscreen().catch(() => {});
+         }
          httpClient.mutation("timers:updateStatus", {
            roomId,
            status: "running",
@@ -1223,6 +1227,10 @@
       if (timerState.isPaused) {
         // Resume
         if (isSynced) {
+          requestWakeLock();
+          if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+          }
           const timeVal = timerState.mode === 'countdown' ? timerState.remainingSeconds : timerState.elapsedSeconds;
           httpClient.mutation("timers:updateStatus", {
              roomId,
