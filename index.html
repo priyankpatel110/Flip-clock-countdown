@@ -362,6 +362,36 @@
       background-color: rgba(255, 255, 255, 0.05);
     }
 
+    .join-room-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: stretch;
+    }
+
+    .join-room-input {
+      background: transparent;
+      border: 1px solid var(--text-muted);
+      color: var(--text-light);
+      text-transform: uppercase;
+      padding: 0 1rem;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 1rem;
+      letter-spacing: 1.5px;
+      width: 140px;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .join-room-input:focus {
+      border-color: var(--text-light);
+    }
+
+    .join-room-input::placeholder {
+      color: var(--text-muted);
+      opacity: 0.5;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 1024px) {
       .flip-card {
@@ -389,6 +419,16 @@
       }
       .control-area .btn {
         width: 100%;
+      }
+      .join-room-group {
+        width: 100%;
+      }
+      .join-room-input {
+        flex: 1;
+        width: auto;
+      }
+      .join-room-group .btn {
+        width: auto;
       }
       .flip-cards {
         gap: 0.25rem;
@@ -700,6 +740,11 @@
       <button class="btn" id="btn-pause">PAUSE</button>
       <button class="btn" id="btn-reset">RESET</button>
       <button class="btn" id="btn-share" style="border-color: var(--accent); color: var(--accent)">SHARE LINK</button>
+      <button class="btn" id="btn-leave" style="display: none; border-color: #ff3535; color: #ff3535">LEAVE ROOM</button>
+      <div class="join-room-group" id="join-room-group">
+        <input type="text" id="join-room-input" class="join-room-input" placeholder="ROOM CODE">
+        <button class="btn" id="btn-join">JOIN</button>
+      </div>
     </div>
   </footer>
 
@@ -724,6 +769,35 @@
     const btnPause = document.getElementById('btn-pause');
     const btnReset = document.getElementById('btn-reset');
     
+    const joinRoomGroup = document.getElementById('join-room-group');
+    const joinRoomInput = document.getElementById('join-room-input');
+    const btnJoin = document.getElementById('btn-join');
+    const btnLeave = document.getElementById('btn-leave');
+
+    if (isSynced) {
+      if (joinRoomGroup) joinRoomGroup.style.display = 'none';
+      if (btnLeave) btnLeave.style.display = '';
+    }
+
+    btnJoin.addEventListener('click', () => {
+      const code = joinRoomInput.value.trim().toLowerCase();
+      if (code) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('room', code);
+        window.location.href = url.toString();
+      }
+    });
+
+    btnLeave.addEventListener('click', () => {
+      window.location.href = window.location.pathname;
+    });
+
+    joinRoomInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        btnJoin.click();
+      }
+    });
+
     const btnModeDown = document.getElementById('btn-mode-down');
     const btnModeUp = document.getElementById('btn-mode-up');
     
@@ -1140,6 +1214,9 @@
         roomId = newRoomId;
         isSynced = true;
         
+        if (joinRoomGroup) joinRoomGroup.style.display = 'none';
+        if (btnLeave) btnLeave.style.display = '';
+
         btnShare.textContent = "COPIED!";
         setTimeout(() => btnShare.textContent = "SHARE LINK", 2000);
         navigator.clipboard.writeText(window.location.href);
@@ -1486,7 +1563,8 @@
     document.addEventListener('keydown', (e) => {
       if (document.activeElement === hoursInput ||
           document.activeElement === minutesInput ||
-          document.activeElement === secondsInput) return;
+          document.activeElement === secondsInput ||
+          document.activeElement === joinRoomInput) return;
           
       if (e.code === 'Space') {
         e.preventDefault();
